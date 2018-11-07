@@ -10,7 +10,7 @@ import (
 )
 
 func DHTPacketHandler(table *dht.DistributedHashTable, packet dht.Packet) {
-	msg := unpackMessageFromPackage(packet.Data)
+	msg := core.UnpackMessageFromPackage(packet.Data)
 	runner := core.GetProtocolManager().GetProtocolRunner(msg.Header)
 
 	logrus.Debug("[DHTPacketHandler] Handle message [MsgHeader=", msg.Header.String(), ", MsgID=", msg.ProtocolID, "] started")
@@ -27,7 +27,7 @@ func NewNodeHandler(peerID []byte, node *dht.Node) {
 	logrus.Infof("new node recorded, id: %x, ip: %s, port: %d", []byte(node.ID.RawString()), node.Addr.IP.String(), node.Addr.Port)
 
 	//TODO PeerManager count limit
-	if peerManager.Has(peerID) {
+	if core.GetPeerManager().Has(peerID) {
 		return
 	}
 
@@ -38,7 +38,7 @@ func NewNodeHandler(peerID []byte, node *dht.Node) {
 	}
 
 	p := NewPeerWithConnection(peerID, node, conn.(*net.TCPConn))
-	peerManager.Set(p)
+	core.GetPeerManager().Set(p)
 	logrus.Infof("new peer connect id: %x, address: %s", p.Guid, conn.RemoteAddr().String())
 
 	p.Handshake()

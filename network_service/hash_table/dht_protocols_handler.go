@@ -28,7 +28,7 @@ func RunHelloTCP(t *dht.Transport, msg *core.Protocol) error {
 	p.Node = node
 	p.Guid = payload.Guid
 
-	peerManager.Set(p)
+	core.GetPeerManager().Set(p)
 
 	logrus.Infof("peer handshake, peerID: %x", p.Guid)
 

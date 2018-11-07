@@ -10,6 +10,7 @@ import (
 	"github.com/profzone/imblock/global"
 	"github.com/johnnyeven/terra/dht"
 	"github.com/profzone/imblock/core"
+	"github.com/profzone/imblock/global/protocols"
 )
 
 const TransactionExpiredTime = 2 * time.Minute
@@ -21,7 +22,7 @@ var _ interface {
 type ChainProtobufClient struct {
 	conn      *net.TCPConn
 	transport *dht.Transport
-	peer      *Peer
+	peer      *core.Peer
 }
 
 func NewChainProtobufTransport(conn net.Conn, maxCursor uint64) *dht.Transport {
@@ -34,7 +35,15 @@ func NewChainProtobufTransport(conn net.Conn, maxCursor uint64) *dht.Transport {
 	return transport
 }
 
-func (c *ChainProtobufClient) GetPeer() *Peer {
+func NewPeerWithConnection(id []byte, node *dht.Node, conn *net.TCPConn) *core.Peer {
+	t := NewChainProtobufTransport(conn, 5000)
+	p := core.NewPeerWithTransport(id, node, t)
+	t.GetClient().(*ChainProtobufClient).peer = p
+
+	return p
+}
+
+func (c *ChainProtobufClient) GetPeer() *core.Peer {
 	return c.peer
 }
 
@@ -71,7 +80,7 @@ func (c *ChainProtobufClient) SetWriteDeadline(t time.Time) error {
 }
 
 func (c *ChainProtobufClient) MakeRequest(id interface{}, remoteAddr net.Addr, requestType string, data interface{}) *dht.Request {
-	msg, ok := data.(core.ProtocolSerializable)
+	msg, ok := data.(protocols.ProtocolSerializable)
 	if !ok {
 		logrus.Panicf("%s is not implement protocols.ProtocolSerializable", reflect.TypeOf(data).String())
 	}
@@ -96,7 +105,7 @@ func (c *ChainProtobufClient) MakeRequest(id interface{}, remoteAddr net.Addr, r
 }
 
 func (c *ChainProtobufClient) MakeResponse(id interface{}, remoteAddr net.Addr, tranID interface{}, data interface{}) *dht.Request {
-	msg, ok := data.(core.ProtocolSerializable)
+	msg, ok := data.(protocols.ProtocolSerializable)
 	if !ok {
 		logrus.Panicf("%s is not implement protocols.ProtocolSerializable", reflect.TypeOf(data).String())
 	}
@@ -155,7 +164,7 @@ Run:
 }
 
 func (c *ChainProtobufClient) Send(request *dht.Request) error {
-	count, err := c.conn.Write(packMessage(request.Data.(*core.Protocol)))
+	count, err := c.conn.Write(core.PackMessage(request.Data.(*core.Protocol)))
 	if err != nil {
 		return err
 	}
@@ -183,7 +192,7 @@ func (c *ChainProtobufClient) Receive(receiveChannel chan dht.Packet) {
 		if count == 0 {
 			continue
 		}
-		truncatedData = unpackMessage(append(truncatedData, buffer[:count]...), readMessage, c.conn.RemoteAddr())
+		truncatedData = core.UnpackMessage(append(truncatedData, buffer[:count]...), readMessage, c.conn.RemoteAddr())
 	}
 }
 
@@ -194,6 +203,6 @@ func (c *ChainProtobufClient) handleDeserializeData(readMessage <-chan *core.Pro
 			break
 		}
 
-		receiveChannel <- dht.Packet{packMessage(msg), msg.RemoteAddr}
+		receiveChannel <- dht.Packet{core.PackMessage(msg), msg.RemoteAddr}
 	}
 }

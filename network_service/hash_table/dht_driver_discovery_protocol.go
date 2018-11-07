@@ -10,6 +10,7 @@ import (
 	"github.com/profzone/imblock/global"
 	"github.com/profzone/imblock/core"
 	"github.com/johnnyeven/terra/dht"
+	"github.com/profzone/imblock/global/protocols"
 )
 
 var _ interface {
@@ -64,7 +65,7 @@ func (c *ProtobufClient) SetWriteDeadline(t time.Time) error {
 }
 
 func (c *ProtobufClient) MakeRequest(id interface{}, remoteAddr net.Addr, requestType string, data interface{}) *dht.Request {
-	msg, ok := data.(core.ProtocolSerializable)
+	msg, ok := data.(protocols.ProtocolSerializable)
 	if !ok {
 		logrus.Panicf("%s is not implement protocols.ProtocolSerializable", reflect.TypeOf(data).String())
 	}
@@ -89,7 +90,7 @@ func (c *ProtobufClient) MakeRequest(id interface{}, remoteAddr net.Addr, reques
 }
 
 func (c *ProtobufClient) MakeResponse(id interface{}, remoteAddr net.Addr, tranID interface{}, data interface{}) *dht.Request {
-	msg, ok := data.(core.ProtocolSerializable)
+	msg, ok := data.(protocols.ProtocolSerializable)
 	if !ok {
 		logrus.Panicf("%s is not implement protocols.ProtocolSerializable", reflect.TypeOf(data).String())
 	}
@@ -149,7 +150,7 @@ Run:
 }
 
 func (c *ProtobufClient) Send(request *dht.Request) error {
-	count, err := c.conn.WriteToUDP(packMessage(request.Data.(*core.Protocol)), request.RemoteAddr.(*net.UDPAddr))
+	count, err := c.conn.WriteToUDP(core.PackMessage(request.Data.(*core.Protocol)), request.RemoteAddr.(*net.UDPAddr))
 	if err != nil {
 		return err
 	}
@@ -176,7 +177,7 @@ func (c *ProtobufClient) Receive(receiveChannel chan dht.Packet) {
 		if count == 0 {
 			continue
 		}
-		truncatedData = unpackMessage(append(truncatedData, buffer[:count]...), readedUDPMessage, udpAddr)
+		truncatedData = core.UnpackMessage(append(truncatedData, buffer[:count]...), readedUDPMessage, udpAddr)
 	}
 }
 
@@ -187,6 +188,6 @@ func (c *ProtobufClient) handleDeserializeData(readMessage <-chan *core.Protocol
 			break
 		}
 
-		receiveChannel <- dht.Packet{packMessage(msg), msg.RemoteAddr}
+		receiveChannel <- dht.Packet{core.PackMessage(msg), msg.RemoteAddr}
 	}
 }

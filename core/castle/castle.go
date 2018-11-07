@@ -65,7 +65,7 @@ func (s *Castle) Start() error {
 			core.GetProtocolManager().RegisterProtocol(m)
 		}
 		s.services[t] = service
-		service.Start()
+		go service.Start()
 	}
 	return nil
 }

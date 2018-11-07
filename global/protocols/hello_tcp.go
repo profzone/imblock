@@ -3,11 +3,10 @@ package protocols
 import (
 	"github.com/golang/protobuf/proto"
 	"github.com/profzone/imblock/global"
-	"github.com/profzone/imblock/core"
 )
 
 var _ interface {
-	core.ProtocolSerializable
+	ProtocolSerializable
 } = (*HelloTCP)(nil)
 
 func (msg *HelloTCP) GetProtocolType() global.MessageType {

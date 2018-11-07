@@ -1,14 +1,13 @@
-package hash_table
+package core
 
 import (
 	"github.com/sirupsen/logrus"
-	"github.com/profzone/imblock/core"
 	"github.com/johnnyeven/terra/dht"
 )
 
 func PeerPacketHandler(p *Peer, packet dht.Packet) {
-	msg := unpackMessageFromPackage(packet.Data)
-	runner := core.GetProtocolManager().GetProtocolRunner(msg.Header)
+	msg := UnpackMessageFromPackage(packet.Data)
+	runner := protocolManager.GetProtocolRunner(msg.Header)
 
 	logrus.Debug("[PeerPacketHandler] Handle message [MsgHeader=", msg.Header.String(), ", MsgID=", msg.ProtocolID, "] started")
 

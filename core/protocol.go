@@ -18,9 +18,3 @@ func init() {
 	gob.Register(&net.UDPAddr{})
 	gob.Register(&net.TCPAddr{})
 }
-
-type ProtocolSerializable interface {
-	GetProtocolType() global.MessageType
-	DecodeFromSource([]byte) error
-	EncodeFromSource() ([]byte, error)
-}

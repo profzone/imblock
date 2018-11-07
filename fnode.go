@@ -8,6 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"flag"
 	"github.com/profzone/imblock/global"
+	"github.com/abiosoft/ishell"
 )
 
 var (
@@ -27,6 +28,9 @@ func main() {
 	stack.RegisterService(network_service.NewNetworkDHTServiceBootstrap)
 
 	stack.Start()
+
+	shell := ishell.New()
+	shell.Run()
 }
 
 func initConfig() {

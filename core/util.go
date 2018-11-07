@@ -1,4 +1,4 @@
-package hash_table
+package core
 
 import (
 	"net"
@@ -7,10 +7,9 @@ import (
 	"bytes"
 	"github.com/sirupsen/logrus"
 	"github.com/profzone/imblock/global"
-	"github.com/profzone/imblock/core"
 )
 
-func packMessage(msg *core.Protocol) []byte {
+func PackMessage(msg *Protocol) []byte {
 	var result bytes.Buffer
 	encoder := gob.NewEncoder(&result)
 
@@ -25,7 +24,7 @@ func packMessage(msg *core.Protocol) []byte {
 	return append(dataLengthBuffer.Bytes(), resultBytes[:]...)
 }
 
-func unpackMessageFromPackage(source []byte) *core.Protocol {
+func UnpackMessageFromPackage(source []byte) *Protocol {
 
 	if len(source) <= int(global.HeaderLength) {
 		logrus.Panicf("len(source) <= %d", global.HeaderLength)
@@ -33,7 +32,7 @@ func unpackMessageFromPackage(source []byte) *core.Protocol {
 
 	source = source[global.HeaderLength:]
 
-	var msg core.Protocol
+	var msg Protocol
 	decoder := gob.NewDecoder(bytes.NewReader(source))
 	err := decoder.Decode(&msg)
 	if err != nil {
@@ -43,7 +42,7 @@ func unpackMessageFromPackage(source []byte) *core.Protocol {
 	return &msg
 }
 
-func unpackMessage(source []byte, readedMessage chan *core.Protocol, remoteAddr net.Addr) []byte {
+func UnpackMessage(source []byte, readedMessage chan *Protocol, remoteAddr net.Addr) []byte {
 	length := len(source)
 	if length == 0 {
 		return source
@@ -63,11 +62,11 @@ func unpackMessage(source []byte, readedMessage chan *core.Protocol, remoteAddr 
 		}
 		packageData := source[offset : offset+packageLength]
 
-		var msg core.Protocol
+		var msg Protocol
 		decoder := gob.NewDecoder(bytes.NewReader(packageData))
 		err := decoder.Decode(&msg)
 		if err != nil {
-			logrus.Errorf("unpackMessage error: %v", err)
+			logrus.Errorf("UnpackMessage error: %v", err)
 		} else {
 			if remoteAddr != nil {
 				msg.RemoteAddr = remoteAddr

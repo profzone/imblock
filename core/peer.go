@@ -1,7 +1,6 @@
-package hash_table
+package core
 
 import (
-	"net"
 	"time"
 	"github.com/marpie/goguid"
 	"github.com/sirupsen/logrus"
@@ -20,8 +19,7 @@ type Peer struct {
 	Handler       func(*Peer, dht.Packet)
 }
 
-func NewPeerWithConnection(id []byte, node *dht.Node, conn *net.TCPConn) *Peer {
-	t := NewChainProtobufTransport(conn, 5000)
+func NewPeerWithTransport(id []byte, node *dht.Node, t *dht.Transport) *Peer {
 	p := &Peer{
 		Guid:          id,
 		Node:          node,
@@ -31,7 +29,6 @@ func NewPeerWithConnection(id []byte, node *dht.Node, conn *net.TCPConn) *Peer {
 		quitChannel:   make(chan struct{}),
 		Handler:       PeerPacketHandler,
 	}
-	t.GetClient().(*ChainProtobufClient).peer = p
 
 	go p.Run()
 
