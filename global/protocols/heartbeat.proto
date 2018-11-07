@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package protocols;
+
+message Heartbeat {
+    int64 sequence = 1;
+}

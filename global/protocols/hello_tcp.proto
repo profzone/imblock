@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package protocols;
+
+message HelloTCP {
+    bytes guid = 1;
+    bytes node = 2;
+}
