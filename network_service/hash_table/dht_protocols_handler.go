@@ -150,3 +150,36 @@ func findOrContinueRequestTarget(table *dht.DistributedHashTable, targetID []byt
 
 	return nil
 }
+
+func RunHeartbeat(t *dht.Transport, msg *core.Protocol) error {
+
+	payload := &protocols.Heartbeat{}
+	err := payload.DecodeFromSource(msg.Payload)
+	if err != nil {
+		return err
+	}
+
+	ack := &protocols.HeartbeatAck{
+		Sequence: payload.Sequence,
+	}
+
+	peer := t.GetClient().(*ChainProtobufClient).GetPeer()
+	request := t.MakeResponse(peer.Guid, peer.Node.Addr, msg.ProtocolID, ack)
+	t.Request(request)
+
+	return nil
+}
+
+func RunHeartbeatAck(t *dht.Transport, msg *core.Protocol) error {
+
+	payload := &protocols.HeartbeatAck{}
+	err := payload.DecodeFromSource(msg.Payload)
+	if err != nil {
+		return err
+	}
+
+	peer := t.GetClient().(*ChainProtobufClient).GetPeer()
+	peer.Heartbeat.ResponseMessage(payload.Sequence)
+
+	return nil
+}

@@ -2,8 +2,8 @@ package castle
 
 import (
 	"reflect"
-	"fmt"
 	"github.com/profzone/imblock/core"
+	"github.com/sirupsen/logrus"
 )
 
 type Castle struct {
@@ -46,20 +46,15 @@ func (s *Castle) RegisterService(c ServiceConstructor) {
 	s.serviceFunc = append(s.serviceFunc, c)
 }
 
-func (s *Castle) GetService(serviceType reflect.Type) Service {
-	return s.services[serviceType]
-}
-
 func (s *Castle) Start() error {
 	for _, constructor := range s.serviceFunc {
+
 		service := constructor()
-		t := reflect.TypeOf(service)
-		if t.Kind() == reflect.Ptr {
-			v := reflect.ValueOf(service)
-			if v.IsNil() {
-				panic(fmt.Sprintf("service must not be nil, type: %v", t))
-			}
+		if service == nil {
+			logrus.Panic("service must not be nil")
 		}
+
+		t := reflect.TypeOf(service)
 		focusMessage := service.Protocols()
 		for _, m := range focusMessage {
 			core.GetProtocolManager().RegisterProtocol(m)
@@ -72,7 +67,9 @@ func (s *Castle) Start() error {
 
 func (s *Castle) Stop() error {
 	for _, service := range s.services {
-		service.Stop()
+		if err := service.Stop(); err != nil {
+			return err
+		}
 	}
 	return nil
 }

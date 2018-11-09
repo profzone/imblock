@@ -170,7 +170,7 @@ func (c *ProtobufClient) Receive(receiveChannel chan dht.Packet) {
 		count, udpAddr, err := c.conn.ReadFromUDP(buffer)
 		if err != nil {
 			if err != io.EOF {
-				logrus.Error(err.Error())
+				return
 			}
 			continue
 		}

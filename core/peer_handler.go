@@ -5,15 +5,15 @@ import (
 	"github.com/johnnyeven/terra/dht"
 )
 
-func PeerPacketHandler(p *Peer, packet dht.Packet) {
+func peerPacketHandler(p *Peer, packet dht.Packet) {
 	msg := UnpackMessageFromPackage(packet.Data)
 	runner := protocolManager.GetProtocolRunner(msg.Header)
 
-	logrus.Debug("[PeerPacketHandler] Handle message [MsgHeader=", msg.Header.String(), ", MsgID=", msg.ProtocolID, "] started")
+	logrus.Debug("[peerPacketHandler] Handle message [MsgHeader=", msg.Header.String(), ", MsgID=", msg.ProtocolID, "] started")
 
 	err := runner(p.transport, msg)
 	if err != nil {
-		logrus.Errorf("[PeerPacketHandler] Handle message err: %v", err)
+		logrus.Errorf("[peerPacketHandler] Handle message err: %v", err)
 	}
 
 	tranID := msg.ProtocolID
@@ -24,5 +24,5 @@ func PeerPacketHandler(p *Peer, packet dht.Packet) {
 		}()
 	}
 
-	logrus.Debug("[PeerPacketHandler] Handle message [MsgHeader=", msg.Header.String(), ", MsgID=", msg.ProtocolID, "] ended")
+	logrus.Debug("[peerPacketHandler] Handle message [MsgHeader=", msg.Header.String(), ", MsgID=", msg.ProtocolID, "] ended")
 }

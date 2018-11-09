@@ -64,14 +64,14 @@ func (s *NetworkDHTServiceBootstrap) listen() {
 	var localAddr = global.Config.LocalAddr.String()
 	s.listener, err = net.Listen("tcp", localAddr)
 	if err != nil {
-		logrus.Panicf("[Server] net.Listen error: %v", err.Error())
+		logrus.Panicf("[NetworkDHTServiceBootstrap] net.Listen error: %v", err.Error())
 	}
-	logrus.Infof("[Server] created and listened at: %s ...", localAddr)
+	logrus.Debugf("[NetworkDHTServiceBootstrap] created and listened at: %s ...", localAddr)
 
 	for {
 		conn, err := s.listener.Accept()
 		if err != nil {
-			logrus.Fatalf("[Server] listener.Accept error: %v", err)
+			logrus.Fatalf("[NetworkDHTServiceBootstrap] listener.Accept error: %v", err)
 		}
 
 		go s.handleConnection(conn)
@@ -80,7 +80,7 @@ func (s *NetworkDHTServiceBootstrap) listen() {
 
 func (s *NetworkDHTServiceBootstrap) handleConnection(conn net.Conn) {
 	p := hash_table.NewPeerWithConnection(nil, nil, conn.(*net.TCPConn))
-	logrus.Infof("new peer connected id: %x, address: %s", p.Guid, conn.RemoteAddr().String())
+	logrus.Infof("[NetworkDHTServiceBootstrap] new peer connected id: %x, address: %s", p.Guid, conn.RemoteAddr().String())
 }
 
 func (s *NetworkDHTServiceBootstrap) Messages() []message_bus.MessageHandler {
@@ -101,6 +101,14 @@ func (s *NetworkDHTServiceBootstrap) Protocols() []core.ProtocolHandler {
 			Type:   global.MESSAGE_TYPE__FIND_NODE_ACK,
 			Runner: hash_table.RunFindNodeAck,
 		},
+		{
+			Type:   global.MESSAGE_TYPE__HEARTBEAT,
+			Runner: hash_table.RunHeartbeat,
+		},
+		{
+			Type:   global.MESSAGE_TYPE__HEARTBEAT_ACK,
+			Runner: hash_table.RunHeartbeatAck,
+		},
 	}
 }
 
@@ -109,6 +117,7 @@ func (s *NetworkDHTServiceBootstrap) Start() error {
 	go s.listen()
 	go s.service.Run()
 
+	logrus.Info("[NetworkDHTServiceBootstrap] started.")
 Run:
 	for {
 		select {
@@ -117,6 +126,7 @@ Run:
 		}
 	}
 
+	close(s.quitSignal)
 	return nil
 }
 
@@ -124,7 +134,7 @@ func (s *NetworkDHTServiceBootstrap) Stop() error {
 
 	s.quitSignal <- struct{}{}
 	s.service.Close()
-	close(s.quitSignal)
 
+	logrus.Info("[NetworkDHTServiceBootstrap] stopped.")
 	return nil
 }

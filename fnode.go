@@ -2,13 +2,16 @@ package main
 
 import (
 	"github.com/profzone/imblock/core/castle"
-	"github.com/profzone/imblock/network_service"
 	"github.com/spf13/viper"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"flag"
 	"github.com/profzone/imblock/global"
-	"github.com/abiosoft/ishell"
+	"os"
+	"github.com/profzone/imblock/persistence_service"
+	"github.com/profzone/imblock/api_service"
+	"os/signal"
+	"github.com/profzone/imblock/network_service"
 )
 
 var (
@@ -25,12 +28,20 @@ func main() {
 	global.InitConfig(configGroup)
 
 	stack := castle.NewStack("fnode")
+	stack.RegisterService(persistence_service.NewPersistenceBoltDBServiceBootstrap)
 	stack.RegisterService(network_service.NewNetworkDHTServiceBootstrap)
+	stack.RegisterService(api_service.NewApiHttpServiceBootstrap)
 
 	stack.Start()
 
-	shell := ishell.New()
-	shell.Run()
+	sigint := make(chan os.Signal, 1)
+	signal.Notify(sigint, os.Interrupt)
+	<-sigint
+
+	logrus.Info("system shutting down")
+	if err := stack.Stop(); err == nil {
+		logrus.Info("system shutdown.")
+	}
 }
 
 func initConfig() {
@@ -63,4 +74,6 @@ func initConfig() {
 	default:
 		logrus.SetLevel(logrus.InfoLevel)
 	}
+	logrus.SetOutput(os.Stdout)
+	logrus.AddHook(ContextHook{})
 }

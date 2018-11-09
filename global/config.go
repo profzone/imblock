@@ -49,9 +49,14 @@ var Config = &struct {
 	LocalAddr *net.UDPAddr
 	// -----------------------------------------------------------------------------------
 
-	// -------------------------------BlockChain Config ----------------------------------
+	// ------------------------------- BlockChain Config ---------------------------------
 
-	CheckPeerPeriod     time.Duration
+	CheckPeerPeriod time.Duration
+	// -----------------------------------------------------------------------------------
+
+	// --------------------------------- API Config --------------------------------------
+
+	ServerPort int
 	// -----------------------------------------------------------------------------------
 }{
 	HeartbeatTaskSpec:     "*/10 * * * * *",
@@ -106,6 +111,7 @@ func initFirstRun() {
 		checkFirstRunSeedConfig(bucket)
 		checkFirstRunReceiveAddress(bucket)
 		checkFirstRunDHTConfig(bucket)
+		checkFirstRunApiConfig(bucket)
 		return nil
 	})
 	if err != nil {
@@ -282,4 +288,13 @@ func checkFirstRunDHTConfig(bucket *bolt.Bucket) {
 		logrus.Panicf("DHT_LOCAL_ADDR ResolveUDPAddr error: %v", err)
 	}
 	Config.LocalAddr = addr
+}
+
+func checkFirstRunApiConfig(bucket *bolt.Bucket) {
+	serverPort := viper.GetInt("API_SERVER_PORT")
+	if serverPort != 0 {
+		Config.ServerPort = serverPort
+	} else {
+		Config.NodeExpriedAfter = 8000
+	}
 }

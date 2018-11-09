@@ -10,13 +10,13 @@ import (
 )
 
 type Peer struct {
-	Guid          []byte
-	Node          *dht.Node
-	Heartbeat     *Heartbeat
+	Guid          []byte     `json:"guid"`
+	Node          *dht.Node  `json:"node"`
+	Heartbeat     *Heartbeat `json:"heartbeat"`
 	transport     *dht.Transport
 	packetChannel chan dht.Packet
 	quitChannel   chan struct{}
-	Handler       func(*Peer, dht.Packet)
+	handler       func(*Peer, dht.Packet)
 }
 
 func NewPeerWithTransport(id []byte, node *dht.Node, t *dht.Transport) *Peer {
@@ -27,7 +27,7 @@ func NewPeerWithTransport(id []byte, node *dht.Node, t *dht.Transport) *Peer {
 		transport:     t,
 		packetChannel: make(chan dht.Packet),
 		quitChannel:   make(chan struct{}),
-		Handler:       PeerPacketHandler,
+		handler:       peerPacketHandler,
 	}
 
 	go p.Run()
@@ -45,7 +45,7 @@ Run:
 	for {
 		select {
 		case packet := <-p.packetChannel:
-			p.Handler(p, packet)
+			p.handler(p, packet)
 		case <-tick:
 			p.Ping()
 		case <-p.quitChannel:
@@ -91,8 +91,8 @@ func (p *Peer) Close() {
 }
 
 type Heartbeat struct {
-	Delay       float64
-	Health      uint8
+	Delay       float64	`json:"delay"`
+	Health      uint8	`json:"health"`
 	messageList map[int64]time.Time
 }
 
