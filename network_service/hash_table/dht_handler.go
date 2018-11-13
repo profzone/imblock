@@ -11,6 +11,10 @@ import (
 
 func DHTPacketHandler(table *dht.DistributedHashTable, packet dht.Packet) {
 	msg := core.UnpackMessageFromPackage(packet.Data)
+	if msg == nil {
+		return
+	}
+
 	runner := core.GetProtocolManager().GetProtocolRunner(msg.Header)
 
 	logrus.Debug("[DHTPacketHandler] Handle message [MsgHeader=", msg.Header.String(), ", MsgID=", msg.ProtocolID, "] started")

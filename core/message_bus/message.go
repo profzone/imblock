@@ -1,8 +1,13 @@
 package message_bus
 
+const (
+	TOPIC_CREATE_ACCOUNT = "account/create"
+	TOPIC_GET_ACCOUNTS = "account/list"
+)
+
 type Message struct {
-	TransID   uint64
-	ServiceID uint64
+	TransID   int64
+	ServiceID int64
 	Topic     string
-	Data      interface{}
+	Data      map[string]interface{}
 }

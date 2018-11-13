@@ -14,7 +14,6 @@ func init() {
 // 获取节点列表
 type GetPeers struct {
 	httpx.MethodGet
-
 }
 
 func (req GetPeers) Path() string {

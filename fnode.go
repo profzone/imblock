@@ -12,6 +12,7 @@ import (
 	"github.com/profzone/imblock/api_service"
 	"os/signal"
 	"github.com/profzone/imblock/network_service"
+	"github.com/profzone/imblock/account_service"
 )
 
 var (
@@ -31,6 +32,7 @@ func main() {
 	stack.RegisterService(persistence_service.NewPersistenceBoltDBServiceBootstrap)
 	stack.RegisterService(network_service.NewNetworkDHTServiceBootstrap)
 	stack.RegisterService(api_service.NewApiHttpServiceBootstrap)
+	stack.RegisterService(account_service.NewAccountB58ServiceBootstrap)
 
 	stack.Start()
 
@@ -38,9 +40,9 @@ func main() {
 	signal.Notify(sigint, os.Interrupt)
 	<-sigint
 
-	logrus.Info("system shutting down")
+	logrus.Info("[main] system graceful shutting down")
 	if err := stack.Stop(); err == nil {
-		logrus.Info("system shutdown.")
+		logrus.Info("[main] system graceful shutdown.")
 	}
 }
 

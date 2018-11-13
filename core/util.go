@@ -9,6 +9,24 @@ import (
 	"github.com/profzone/imblock/global"
 )
 
+func IntToByte(value uint64) []byte {
+	buff := &bytes.Buffer{}
+	err := binary.Write(buff, binary.BigEndian, value)
+	if err != nil {
+		logrus.Panicf("IntToByte value: %v, err: %v", value, err)
+	}
+
+	return buff.Bytes()
+}
+
+// ReverseBytes reverses a byte array
+func ReverseBytes(data []byte) {
+	for i, j := 0, len(data)-1; i < j; i, j = i+1, j-1 {
+		data[i], data[j] = data[j], data[i]
+	}
+}
+
+
 func PackMessage(msg *Protocol) []byte {
 	var result bytes.Buffer
 	encoder := gob.NewEncoder(&result)
@@ -27,7 +45,8 @@ func PackMessage(msg *Protocol) []byte {
 func UnpackMessageFromPackage(source []byte) *Protocol {
 
 	if len(source) <= int(global.HeaderLength) {
-		logrus.Panicf("len(source) <= %d", global.HeaderLength)
+		logrus.Errorf("len(source) <= %d", global.HeaderLength)
+		return nil
 	}
 
 	source = source[global.HeaderLength:]

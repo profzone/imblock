@@ -7,9 +7,9 @@ import (
 )
 
 type Castle struct {
-	Name     string
+	Name        string
 	serviceFunc []ServiceConstructor
-	services map[reflect.Type]Service
+	services    map[reflect.Type]Service
 }
 
 var GeneralCastle *Castle
@@ -19,8 +19,8 @@ func NewStack(name string) *Castle {
 		return GeneralCastle
 	}
 	s := &Castle{
-		Name:     name,
-		services: make(map[reflect.Type]Service),
+		Name:       name,
+		services:   make(map[reflect.Type]Service),
 	}
 
 	GeneralCastle = s
@@ -55,10 +55,19 @@ func (s *Castle) Start() error {
 		}
 
 		t := reflect.TypeOf(service)
-		focusMessage := service.Protocols()
-		for _, m := range focusMessage {
-			core.GetProtocolManager().RegisterProtocol(m)
+
+		// register protocols
+		focusProtocols := service.Protocols()
+		for _, p := range focusProtocols {
+			core.GetProtocolManager().RegisterProtocol(p)
 		}
+
+		// register messages
+		focusMessages := service.Messages()
+		for _, m := range focusMessages {
+			core.GetMessageManager().Subscribe(m.Topic, m.Runner)
+		}
+
 		s.services[t] = service
 		go service.Start()
 	}
