@@ -28,22 +28,20 @@ func NewStack(name string) *Castle {
 	return s
 }
 
-//func NewStackWithTemplate(presetName string) *Castle {
-//	if GeneralCastle != nil {
-//		return GeneralCastle
-//	}
-//	preset := presetStack[presetName]
-//	s := NewStack(presetName)
-//
-//	for _, f := range preset {
-//		s.RegisterService(f)
-//	}
-//
-//	return s
-//}
-
 func (s *Castle) RegisterService(c ServiceConstructor) {
 	s.serviceFunc = append(s.serviceFunc, c)
+}
+
+func (s *Castle) Iterator(op func(service Service) error, errContinue bool) {
+	for _, service := range s.services {
+		err := op(service)
+		if err != nil {
+			logrus.Errorf("[Castle] Iterator err: %v", err)
+			if !errContinue {
+				break
+			}
+		}
+	}
 }
 
 func (s *Castle) Start() error {

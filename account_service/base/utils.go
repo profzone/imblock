@@ -1,4 +1,4 @@
-package b58
+package base
 
 import (
 	"crypto/sha256"
@@ -13,7 +13,7 @@ func HashPubKey(pubKey []byte) []byte {
 
 	_, err := hasher.Write(pubHash[:])
 	if err != nil {
-		logrus.Errorf("[B58AccountBootstrap] HashPubKey err: %v", err)
+		logrus.Errorf("[BaseAccountBootstrap] HashPubKey err: %v", err)
 		return nil
 	}
 
@@ -28,4 +28,10 @@ func ValidateAddress(address []byte) bool {
 	targetCheckSum := checkSum(bytes.Join([][]byte{{version}, publicKeyHash}, []byte{}))
 
 	return bytes.Compare(originCheckSum, targetCheckSum) == 0
+}
+
+func checkSum(payload []byte) []byte {
+	firstSum := sha256.Sum256(payload)
+	secondSum := sha256.Sum256(firstSum[:])
+	return secondSum[:AddressChecksumLen]
 }

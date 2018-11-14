@@ -32,7 +32,7 @@ func main() {
 	stack.RegisterService(persistence_service.NewPersistenceBoltDBServiceBootstrap)
 	stack.RegisterService(network_service.NewNetworkDHTServiceBootstrap)
 	stack.RegisterService(api_service.NewApiHttpServiceBootstrap)
-	stack.RegisterService(account_service.NewAccountB58ServiceBootstrap)
+	stack.RegisterService(account_service.NewAccountBaseServiceBootstrap)
 
 	stack.Start()
 

@@ -1,4 +1,4 @@
-package b58
+package base
 
 import (
 	"bytes"

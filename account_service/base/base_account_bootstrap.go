@@ -1,11 +1,10 @@
-package b58
+package base
 
 import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
 	"github.com/sirupsen/logrus"
-	"crypto/sha256"
 	"bytes"
 	"math/big"
 	"fmt"
@@ -17,15 +16,15 @@ const (
 	AddressChecksumLen = 4
 )
 
-type B58AccountBootstrap struct {
+type BaseAccountBootstrap struct {
 	Alias      string
 	PrivateKey *ecdsa.PrivateKey
 	PublicKey  []byte
 }
 
-func NewB58AccountBootstrap(alias string) *B58AccountBootstrap {
+func NewBaseAccountBootstrap(alias string) *BaseAccountBootstrap {
 	private, public := newKeyPair()
-	boot := &B58AccountBootstrap{
+	boot := &BaseAccountBootstrap{
 		PrivateKey: private,
 		PublicKey:  public,
 	}
@@ -37,8 +36,8 @@ func NewB58AccountBootstrap(alias string) *B58AccountBootstrap {
 	return boot
 }
 
-func NewB58AccountBootstrapByPubKey(pubKey []byte) *B58AccountBootstrap {
-	boot := &B58AccountBootstrap{
+func NewBaseAccountBootstrapByPubKey(pubKey []byte) *BaseAccountBootstrap {
+	boot := &BaseAccountBootstrap{
 		PublicKey: pubKey,
 	}
 
@@ -49,18 +48,18 @@ func newKeyPair() (*ecdsa.PrivateKey, []byte) {
 	curve := elliptic.P256()
 	private, err := ecdsa.GenerateKey(curve, rand.Reader)
 	if err != nil {
-		logrus.Panicf("[B58AccountBootstrap] newKeyPair ecdsa.GenerateKey err: %v", err)
+		logrus.Panicf("[BaseAccountBootstrap] newKeyPair ecdsa.GenerateKey err: %v", err)
 	}
 
 	pubKey := append(private.PublicKey.X.Bytes(), private.PublicKey.Y.Bytes()...)
 	return private, pubKey
 }
 
-func (b *B58AccountBootstrap) GetAlias() string {
+func (b *BaseAccountBootstrap) GetAlias() string {
 	return b.Alias
 }
 
-func (b *B58AccountBootstrap) GetAddress() []byte {
+func (b *BaseAccountBootstrap) GetAddress() []byte {
 	pubKeyHash := HashPubKey(b.PublicKey)
 
 	payload := bytes.Join([][]byte{{Version}, pubKeyHash}, []byte{})
@@ -71,37 +70,31 @@ func (b *B58AccountBootstrap) GetAddress() []byte {
 	return Base58Encode(fullPayload)
 }
 
-func checkSum(payload []byte) []byte {
-	firstSum := sha256.Sum256(payload)
-	secondSum := sha256.Sum256(firstSum[:])
-	return secondSum[:AddressChecksumLen]
-}
-
-func (b *B58AccountBootstrap) GetPubKey() []byte {
+func (b *BaseAccountBootstrap) GetPubKey() []byte {
 	return b.PublicKey
 }
 
-func (*B58AccountBootstrap) Lock(content []byte) ([]byte, error) {
+func (*BaseAccountBootstrap) Lock(content []byte) ([]byte, error) {
 	panic("not implement")
 }
 
-func (*B58AccountBootstrap) Unlock(content []byte) ([]byte, error) {
+func (*BaseAccountBootstrap) Unlock(content []byte) ([]byte, error) {
 	panic("not implement")
 }
 
-func (b *B58AccountBootstrap) Sign(hash []byte) ([]byte, error) {
+func (b *BaseAccountBootstrap) Sign(hash []byte) ([]byte, error) {
 	if b.PrivateKey == nil {
-		return nil, errors.New("[B58AccountBootstrap] Sign err: PrivateKey should not be null")
+		return nil, errors.New("[BaseAccountBootstrap] Sign err: PrivateKey should not be null")
 	}
 	r, s, err := ecdsa.Sign(rand.Reader, b.PrivateKey, hash)
 	if err != nil {
-		logrus.Errorf("[B58AccountBootstrap] Sign err: %v", err)
+		logrus.Errorf("[BaseAccountBootstrap] Sign err: %v", err)
 	}
 	signature := bytes.Join([][]byte{r.Bytes(), s.Bytes()}, []byte{})
 	return signature, nil
 }
 
-func (b *B58AccountBootstrap) Verify(hash []byte, signature []byte) error {
+func (b *BaseAccountBootstrap) Verify(hash []byte, signature []byte) error {
 	curve := elliptic.P256()
 
 	r := big.Int{}
@@ -128,7 +121,7 @@ func (b *B58AccountBootstrap) Verify(hash []byte, signature []byte) error {
 	}
 
 	if !ecdsa.Verify(rawPublicKey, hash, &r, &s) {
-		return fmt.Errorf("[B58AccountBootstrap] Verify failed")
+		return fmt.Errorf("[BaseAccountBootstrap] Verify failed")
 	}
 
 	return nil

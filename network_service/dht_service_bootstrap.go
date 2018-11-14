@@ -9,6 +9,7 @@ import (
 	"github.com/profzone/imblock/network_service/hash_table"
 	"github.com/profzone/imblock/core"
 	"github.com/johnnyeven/terra/dht"
+	"github.com/johnnyeven/libtools/courier"
 )
 
 var networkDHT *NetworkDHTServiceBootstrap
@@ -110,6 +111,10 @@ func (s *NetworkDHTServiceBootstrap) Protocols() []core.ProtocolHandler {
 			Runner: hash_table.RunHeartbeatAck,
 		},
 	}
+}
+
+func (s *NetworkDHTServiceBootstrap) Routes() []*courier.Router {
+	return nil
 }
 
 func (s *NetworkDHTServiceBootstrap) Start() error {

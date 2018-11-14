@@ -1,4 +1,4 @@
-package account_service
+package base
 
 import (
 	"bytes"
@@ -6,33 +6,43 @@ import (
 	"io/ioutil"
 	"github.com/profzone/imblock/global"
 	"os"
-	"github.com/profzone/imblock/account_service/b58"
 	"crypto/elliptic"
+	"github.com/profzone/imblock/core/model"
 )
 
 func init() {
 	gob.Register(elliptic.P256())
 }
 
-type B58Bootstrap struct {
-	Accounts map[string]*b58.B58AccountBootstrap
-	Alias    map[string]*b58.B58AccountBootstrap
+var base *BaseBootstrap
+
+type BaseBootstrap struct {
+	Accounts map[string]*BaseAccountBootstrap
+	Alias    map[string]*BaseAccountBootstrap
 }
 
-func NewB58Bootstrap() *B58Bootstrap {
-	return &B58Bootstrap{
-		Accounts: make(map[string]*b58.B58AccountBootstrap),
-		Alias:    make(map[string]*b58.B58AccountBootstrap),
+func GetBase() *BaseBootstrap {
+	return base
+}
+
+func NewBaseBootstrap() *BaseBootstrap {
+	if base != nil {
+		return base
 	}
+	base = &BaseBootstrap{
+		Accounts: make(map[string]*BaseAccountBootstrap),
+		Alias:    make(map[string]*BaseAccountBootstrap),
+	}
+	return base
 }
 
-func (b *B58Bootstrap) CreateAccount(alias string) Account {
+func (b *BaseBootstrap) CreateAccount(alias string) model.Account {
 
 	if _, exist := b.Alias[alias]; exist {
 		return nil
 	}
 
-	account := b58.NewB58AccountBootstrap(alias)
+	account := NewBaseAccountBootstrap(alias)
 	address := account.GetAddress()
 
 	b.Accounts[string(address)] = account
@@ -44,7 +54,7 @@ func (b *B58Bootstrap) CreateAccount(alias string) Account {
 	return account
 }
 
-func (b *B58Bootstrap) GetAddress() [][]byte {
+func (b *BaseBootstrap) GetAddress() [][]byte {
 	var addresses [][]byte
 
 	for address := range b.Accounts {
@@ -54,19 +64,19 @@ func (b *B58Bootstrap) GetAddress() [][]byte {
 	return addresses
 }
 
-func (b *B58Bootstrap) GetAccount(address []byte) Account {
+func (b *BaseBootstrap) GetAccount(address []byte) model.Account {
 	return b.Accounts[string(address)]
 }
 
-func (b *B58Bootstrap) GetAccounts() []Account {
-	result := make([]Account, 0)
+func (b *BaseBootstrap) GetAccounts() []model.Account {
+	result := make([]model.Account, 0)
 	for _, account := range b.Accounts {
 		result = append(result, account)
 	}
 	return result
 }
 
-func (b *B58Bootstrap) Save(filePath string) error {
+func (b *BaseBootstrap) Save(filePath string) error {
 	var buffer bytes.Buffer
 	walletFileName := global.GetWalletFilePath()
 
@@ -84,7 +94,7 @@ func (b *B58Bootstrap) Save(filePath string) error {
 	return nil
 }
 
-func (b *B58Bootstrap) Load(filePath string) error {
+func (b *BaseBootstrap) Load(filePath string) error {
 	walletFileName := global.GetWalletFilePath()
 	if _, err := os.Stat(walletFileName); os.IsNotExist(err) {
 		return err

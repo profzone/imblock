@@ -4,7 +4,6 @@ import (
 	"github.com/johnnyeven/libtools/courier"
 	"github.com/johnnyeven/libtools/courier/swagger"
 	"github.com/profzone/imblock/api_service/restful/routes/peers"
-	"github.com/profzone/imblock/api_service/restful/routes/accounts"
 )
 
 var RootRouter = courier.NewRouter(Root{})
@@ -15,7 +14,6 @@ func init() {
 	RootRouter.Register(VersionRouter)
 
 	VersionRouter.Register(peers.Router)
-	VersionRouter.Register(accounts.Router)
 }
 
 type Root struct {

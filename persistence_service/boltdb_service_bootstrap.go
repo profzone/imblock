@@ -7,6 +7,7 @@ import (
 	"github.com/profzone/imblock/persistence_service/boltdb"
 	"github.com/profzone/imblock/global"
 	"github.com/sirupsen/logrus"
+	"github.com/johnnyeven/libtools/courier"
 )
 
 var persistenceBoltDB *PersistenceBoltDBServiceBootstrap
@@ -32,6 +33,10 @@ func (s *PersistenceBoltDBServiceBootstrap) Messages() []message_bus.MessageHand
 }
 
 func (s *PersistenceBoltDBServiceBootstrap) Protocols() []core.ProtocolHandler {
+	return nil
+}
+
+func (s *PersistenceBoltDBServiceBootstrap) Routes() []*courier.Router {
 	return nil
 }
 

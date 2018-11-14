@@ -3,7 +3,8 @@ package consensus_service
 import (
 	"github.com/profzone/imblock/core/castle"
 	"github.com/profzone/imblock/core/message_bus"
-	"github.com/profzone/imblock/global/protocols"
+	"github.com/profzone/imblock/core"
+	"github.com/johnnyeven/libtools/courier"
 )
 
 var _ interface{
@@ -18,7 +19,11 @@ func (s *ConsensusPOWServiceBootstrap) Messages() []message_bus.MessageHandler {
 	return nil
 }
 
-func (s *ConsensusPOWServiceBootstrap) Protocols() []protocols.ProtocolHandler {
+func (s *ConsensusPOWServiceBootstrap) Protocols() []core.ProtocolHandler {
+	return nil
+}
+
+func (s *ConsensusPOWServiceBootstrap) Routes() []*courier.Router {
 	return nil
 }
 
