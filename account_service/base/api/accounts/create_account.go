@@ -6,8 +6,8 @@ import (
 	"context"
 	"github.com/profzone/imblock/account_service/base"
 	"fmt"
-	"github.com/profzone/imblock/core/message_bus"
 	"github.com/profzone/imblock/account_service/base/model"
+	"github.com/profzone/imblock/core/constant"
 )
 
 func init() {
@@ -33,7 +33,7 @@ func (req CreateAccount) Output(ctx context.Context) (result interface{}, err er
 	account := base.GetBase().CreateAccount(req.Body.Alias)
 
 	if account == nil {
-		err = fmt.Errorf("[AccountBaseServiceBootstrap] Handle message error: topic=%s, err=%s", message_bus.TOPIC_CREATE_ACCOUNT, "alias has been used")
+		err = fmt.Errorf("[AccountBaseServiceBootstrap] Handle message error: topic=%s, err=%s", constant.TOPIC_ACCOUNT_CREATE, "alias has been used")
 		return
 	}
 

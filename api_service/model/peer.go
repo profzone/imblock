@@ -1,4 +1,4 @@
-package serializable
+package model
 
 type Node struct {
 	ID             string `json:"id"`

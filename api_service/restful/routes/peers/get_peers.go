@@ -4,7 +4,10 @@ import (
 	"github.com/johnnyeven/libtools/courier"
 	"github.com/johnnyeven/libtools/courier/httpx"
 	"context"
-	"github.com/profzone/imblock/api_service/restful/services"
+	"github.com/profzone/imblock/api_service/model"
+	"github.com/profzone/imblock/core"
+	"fmt"
+	"github.com/johnnyeven/libtools/timelib"
 )
 
 func init() {
@@ -21,5 +24,23 @@ func (req GetPeers) Path() string {
 }
 
 func (req GetPeers) Output(ctx context.Context) (result interface{}, err error) {
-	return services.GetApi().GetPeers()
+	replies := make([]model.Peer, 0)
+	core.GetPeerManager().Iterator(func(peer *core.Peer) error {
+
+		replies = append(replies, model.Peer{
+			Guid: fmt.Sprintf("0x%x", peer.Guid),
+			Node: model.Node{
+				ID:             peer.Node.ID.HexString(),
+				Addr:           peer.Node.Addr.String(),
+				LastActiveTime: timelib.MySQLDatetime(peer.Node.LastActiveTime).String(),
+			},
+			Heartbeat: model.Heartbeat{
+				Delay:  peer.Heartbeat.Delay,
+				Health: peer.Heartbeat.Health,
+			},
+		})
+		return nil
+	}, false)
+
+	return replies, nil
 }

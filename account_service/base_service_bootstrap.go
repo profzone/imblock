@@ -10,6 +10,7 @@ import (
 	"github.com/profzone/imblock/account_service/base"
 	"github.com/johnnyeven/libtools/courier"
 	"github.com/profzone/imblock/account_service/base/api/accounts"
+	"github.com/profzone/imblock/core/constant"
 )
 
 var _ interface {
@@ -29,16 +30,16 @@ func NewAccountBaseServiceBootstrap() castle.Service {
 func (s *AccountBaseServiceBootstrap) Messages() []message_bus.MessageHandler {
 	return []message_bus.MessageHandler{
 		{
-			Topic: message_bus.TOPIC_CREATE_ACCOUNT,
+			Topic: constant.TOPIC_ACCOUNT_CREATE,
 			Runner: func(message message_bus.Message) (reply message_bus.Message, err error) {
 				data, ok := message.Data.(map[string]string)
 				if !ok {
-					err = fmt.Errorf("[AccountBaseServiceBootstrap] Handle message error: topic=%s, err=%s", message_bus.TOPIC_CREATE_ACCOUNT, "request parameter is not map")
+					err = fmt.Errorf("[AccountBaseServiceBootstrap] Handle message error: topic=%s, err=%s", constant.TOPIC_ACCOUNT_CREATE, "request parameter is not map")
 					return
 				}
 				account := s.service.CreateAccount(data["alias"])
 				if account == nil {
-					err = fmt.Errorf("[AccountBaseServiceBootstrap] Handle message error: topic=%s, err=%s", message_bus.TOPIC_CREATE_ACCOUNT, "alias has been used")
+					err = fmt.Errorf("[AccountBaseServiceBootstrap] Handle message error: topic=%s, err=%s", constant.TOPIC_ACCOUNT_CREATE, "alias has been used")
 					return
 				}
 				reply.Topic = message.Topic
@@ -51,7 +52,7 @@ func (s *AccountBaseServiceBootstrap) Messages() []message_bus.MessageHandler {
 			},
 		},
 		{
-			Topic: message_bus.TOPIC_GET_ACCOUNTS,
+			Topic: constant.TOPIC_ACCOUNT_GET_LIST,
 			Runner: func(message message_bus.Message) (reply message_bus.Message, err error) {
 				accounts := s.service.GetAccounts()
 				reply.Topic = message.Topic

@@ -8,6 +8,8 @@ import (
 	"github.com/profzone/imblock/global"
 	"github.com/sirupsen/logrus"
 	"github.com/johnnyeven/libtools/courier"
+	"github.com/profzone/imblock/core/constant"
+	"errors"
 )
 
 var persistenceBoltDB *PersistenceBoltDBServiceBootstrap
@@ -22,14 +24,45 @@ func NewPersistenceBoltDBServiceBootstrap() castle.Service {
 	}
 
 	persistenceBoltDB = &PersistenceBoltDBServiceBootstrap{
-		DB: boltdb.NewBoltDBBootstrap(global.BlockBucketIdentity),
+		DB: boltdb.NewBoltDBBootstrap(),
 	}
 
 	return persistenceBoltDB
 }
 
 func (s *PersistenceBoltDBServiceBootstrap) Messages() []message_bus.MessageHandler {
-	return nil
+	return []message_bus.MessageHandler{
+		{
+			Topic:  constant.TOPIC_PERSISTENCE_PUT,
+			Runner: func(message message_bus.Message) (reply message_bus.Message, err error) {
+				data, ok := message.Data.(map[string][]byte)
+				if !ok {
+					err = errors.New("[PersistenceBoltDBServiceBootstrap] HandlePut data should be map[string][]byte")
+					return
+				}
+
+				err = s.DB.Put(data["bucket"], data["key"], data["value"])
+				return
+			},
+		},
+		{
+			Topic:  constant.TOPIC_PERSISTENCE_GET,
+			Runner: func(message message_bus.Message) (reply message_bus.Message, err error) {
+				data, ok := message.Data.(map[string][]byte)
+				if !ok {
+					err = errors.New("[PersistenceBoltDBServiceBootstrap] HandleGet data should be map[string][]byte")
+					return
+				}
+
+				result, err := s.DB.Get(data["bucket"], data["key"])
+				if err != nil {
+					return
+				}
+				reply.Data = result
+				return
+			},
+		},
+	}
 }
 
 func (s *PersistenceBoltDBServiceBootstrap) Protocols() []core.ProtocolHandler {
