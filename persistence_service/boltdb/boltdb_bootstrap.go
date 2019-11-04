@@ -1,14 +1,14 @@
 package boltdb
 
 import (
+	"fmt"
 	"github.com/boltdb/bolt"
 	"github.com/pkg/errors"
-	"fmt"
 	"github.com/sirupsen/logrus"
 )
 
 type BoltDBBoostrap struct {
-	db         *bolt.DB
+	db *bolt.DB
 }
 
 func NewBoltDBBootstrap() *BoltDBBoostrap {

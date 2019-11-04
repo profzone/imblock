@@ -1,13 +1,13 @@
 package peers
 
 import (
+	"context"
+	"fmt"
 	"github.com/johnnyeven/libtools/courier"
 	"github.com/johnnyeven/libtools/courier/httpx"
-	"context"
+	"github.com/johnnyeven/libtools/timelib"
 	"github.com/profzone/imblock/api_service/model"
 	"github.com/profzone/imblock/core"
-	"fmt"
-	"github.com/johnnyeven/libtools/timelib"
 )
 
 func init() {

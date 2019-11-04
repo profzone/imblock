@@ -1,18 +1,18 @@
 package main
 
 import (
-	"github.com/profzone/imblock/core/castle"
-	"github.com/spf13/viper"
-	"fmt"
-	"github.com/sirupsen/logrus"
 	"flag"
-	"github.com/profzone/imblock/global"
-	"os"
-	"github.com/profzone/imblock/persistence_service"
-	"github.com/profzone/imblock/api_service"
-	"os/signal"
-	"github.com/profzone/imblock/network_service"
+	"fmt"
 	"github.com/profzone/imblock/account_service"
+	"github.com/profzone/imblock/api_service"
+	"github.com/profzone/imblock/core/castle"
+	"github.com/profzone/imblock/global"
+	"github.com/profzone/imblock/network_service"
+	"github.com/profzone/imblock/persistence_service"
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
+	"os"
+	"os/signal"
 )
 
 var (
@@ -36,14 +36,7 @@ func main() {
 
 	stack.Start()
 
-	sigint := make(chan os.Signal, 1)
-	signal.Notify(sigint, os.Interrupt)
-	<-sigint
-
-	logrus.Info("[main] system graceful shutting down")
-	if err := stack.Stop(); err == nil {
-		logrus.Info("[main] system graceful shutdown.")
-	}
+	gracefulRunAndClose(stack)
 }
 
 func initConfig() {
@@ -78,4 +71,15 @@ func initConfig() {
 	}
 	logrus.SetOutput(os.Stdout)
 	logrus.AddHook(ContextHook{})
+}
+
+func gracefulRunAndClose(stack *castle.Castle) {
+	sigint := make(chan os.Signal, 1)
+	signal.Notify(sigint, os.Interrupt)
+	<-sigint
+
+	logrus.Info("[main] system graceful shutting down")
+	if err := stack.Stop(); err == nil {
+		logrus.Info("[main] system graceful shutdown.")
+	}
 }
